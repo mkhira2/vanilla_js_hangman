@@ -31,14 +31,19 @@ generateBlankArray = (word) => {
 }
 
 document.onkeyup = (event) => {
-    printToDom('', '.failure', 'string')
-    checkWordForLetter(event.key)
+    // allow only letters to be recorded against tries
+    if (event.key.match(/^[A-Za-z]+$/)) {
+        printToDom('', '.failure', 'string')
+        checkWordForLetter(event.key)
+    }
 }
 
 checkWordForLetter = (letter) =>{
+    // avoids initial load bug where 'Meta' counts as a wrong guess 
+    if (letter === 'Meta') { return }
     let letterFound = false
     for(let i = 0; i < gameInstance.wordInArray.length; i++){
-        if(letter === gameInstance.wordInArray[i]){
+        if(letter.toLowerCase() === gameInstance.wordInArray[i]){
             letterFound = true
             gameInstance.inProcessWordArray[i] = letter
         }
@@ -56,7 +61,7 @@ checkWordForLetter = (letter) =>{
 
 checkEndFailure = () => {
     if(gameInstance.attemptsRemaining === 0){
-        printToDom('You are terrible at this.  I guess try again...', '.failure', 'string')
+        printToDom('You are terrible at this. I guess try again...', '.failure', 'string')
         reloadGame()
     }
 }
@@ -64,12 +69,14 @@ checkEndFailure = () => {
 checkEndWin = () => {
     if(gameInstance.inProcessWordArray.indexOf('_') < 0){
         gameInstance.gamesWon += 1
+        document.querySelector('.word').classList.add('winning-word')
         let countdown = 4;
         let interval = setInterval(function(){
-            printToDom("Oh boy now you're going to get an ego " + --countdown, '.failure', 'string')
+            printToDom("Oh boy now you're going to get an ego. Next game in: " + --countdown, '.failure', 'string')
 
             if(countdown <= 0){
                 clearInterval(interval)
+                document.querySelector('.word').classList.remove('winning-word')
                 reloadGame()
             }
         }, 1000)
@@ -100,4 +107,3 @@ printToDom = (input, element, type) => {
 }
 
 onLoad()
-
